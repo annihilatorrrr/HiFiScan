@@ -130,7 +130,7 @@ class Analyzer:
         """Calculate impulse response ``h`` in the time domain."""
         _, H = self.H()
         h = np.fft.irfft(H)
-        h = np.hstack([h[h.size // 2:], h[0:h.size // 2]])
+        h = np.hstack([h[h.size // 2:], h[:h.size // 2]])
         t = np.linspace(0, h.size / self.rate, h.size)
         return XY(t, h)
 
@@ -227,8 +227,7 @@ def tone(f: float, secs: float, rate: int):
     n = int(secs * f)
     secs = n / f
     t = np.arange(0, secs * rate) / rate
-    sine = np.sin(2 * np.pi * f * t)
-    return sine
+    return np.sin(2 * np.pi * f * t)
 
 
 @lru_cache
@@ -259,8 +258,7 @@ def linear_chirp(f0: float, f1: float, secs: float, rate: int):
     secs = 2 * n / (f1 + f0)
     c = (f1 - f0) / secs
     t = np.arange(0, secs * rate) / rate
-    chirp = np.sin(2 * np.pi * (0.5 * c * t ** 2 + f0 * t))
-    return chirp
+    return np.sin(2 * np.pi * (0.5 * c * t ** 2 + f0 * t))
 
 
 def resample(a: np.ndarray, size: int) -> np.ndarray:
@@ -269,8 +267,7 @@ def resample(a: np.ndarray, size: int) -> np.ndarray:
     """
     xp = np.linspace(0, 1, a.size)
     x = np.linspace(0, 1, size)
-    y = np.interp(x, xp, a)
-    return y
+    return np.interp(x, xp, a)
 
 
 @njit
@@ -304,5 +301,4 @@ def window(size: int, beta: float) -> np.ndarray:
 @lru_cache
 def taper(y0: float, y1: float, size: int) -> np.ndarray:
     """Create a smooth transition from y0 to y1 of given size."""
-    tp = (y0 + y1 - (y1 - y0) * np.cos(np.linspace(0, np.pi, size))) / 2
-    return tp
+    return (y0 + y1 - (y1 - y0) * np.cos(np.linspace(0, np.pi, size))) / 2
